@@ -140,6 +140,7 @@ class Bomb:
         self.rct.move_ip(self.vx, self.vy)
         screen.blit(self.img, self.rct)
 
+
 class Score:
     """
     スコアに関するクラス
@@ -154,9 +155,10 @@ class Score:
 
     def update(self, screen: pg.Surface):
         self.img = self.fonto.render(f"スコア：{self.sco}", 0, self.color)
-        self.rect = self.img.get_rect()
-        self.rect.center = (100, HEIGHT - 50)
-        screen.blit(self.img, self.rect)
+        #self.rect = self.img.get_rect()
+        #self.rect.center = (100, HEIGHT - 50)
+        screen.blit(self.img, self.rct)
+
 
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
@@ -166,7 +168,6 @@ def main():
     # bomb = Bomb((255, 0, 0), 10)
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
 
-    
     # beam = None  # ゲーム初期化時にはビームは存在しない
     beams: list[Beam] = []
     score = Score()
@@ -211,7 +212,7 @@ def main():
             if beam is not None and check_bound(beam.rct) != (True, True):
                 beams[i] = None
 
-        beams = [b for b in beams if b is not None]
+        beams = [beam for beam in beams if beam is not None]
         bombs = [bomb for bomb in bombs if bomb is not None]  # Noneを取り除く
 
         key_lst = pg.key.get_pressed()
