@@ -163,10 +163,12 @@ def main():
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
     bg_img = pg.image.load("fig/pg_bg.jpg")
     bird = Bird((300, 200))
-    #bomb = Bomb((255, 0, 0), 10)
+    # bomb = Bomb((255, 0, 0), 10)
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
+
     
-    beam = None  # ゲーム初期化時にはビームは存在しない
+    # beam = None  # ゲーム初期化時にはビームは存在しない
+    beams: list[Beam] = []
     score = Score()
     clock = pg.time.Clock()
     tmr = 0
@@ -176,7 +178,7 @@ def main():
                 return
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
                 # スペースキー押下でBeamクラスのインスタンス生成
-                beam = Beam(bird)            
+                beams.append(Beam(bird))          
         screen.blit(bg_img, [0, 0])
         
         for b, bomb in enumerate(bombs):
@@ -190,20 +192,31 @@ def main():
                 time.sleep(1)
                 return
         
-        for b, bomb in enumerate(bombs):
-            if beam is not None:
+        for i, beam in enumerate(beams):
+            if beam is None:
+                continue
+            for b, bomb in enumerate(bombs):
+                if bomb is None:
+                    continue
                 if beam.rct.colliderect(bomb.rct):
                     # ビームと爆弾が衝突したらビームと爆弾を消す
-                    beam = None  
+                    beams[i] = None  
                     bombs[b] = None
                     score.sco += 1
                     bird.change_img(6, screen)
-                    pg.display.update()
+                    break  # 一つのビームで複数の爆弾を消せないようにする
+                    #pg.display.update()
+
+        for i, beam in enumerate(beams):
+            if beam is not None and check_bound(beam.rct) != (True, True):
+                beams[i] = None
+
+        beams = [b for b in beams if b is not None]
         bombs = [bomb for bomb in bombs if bomb is not None]  # Noneを取り除く
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
-        if beam is not None:  # ビームが存在する場合
+        for beam in beams:  # ビームが存在する場合
             beam.update(screen)
         for bomb in bombs:   # 爆弾が存在する場合   
             bomb.update(screen)
